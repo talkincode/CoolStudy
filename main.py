@@ -1,8 +1,5 @@
-import threading
-
 import streamlit as st
 import sympy as sp
-import re
 import os
 import openai
 from openai import OpenAI
@@ -61,7 +58,7 @@ st.markdown("---")
 lcol, mcol, rcol = st.columns([4, 1, 4])
 
 # 在左侧列创建左侧表达式输入框
-left_expr = lcol.text_input("方程左侧表达式", "a*x**2 + b*x")
+left_expr = lcol.text_input("方程左侧表达式,比如（2 * x^2）", "a*x**2 + b*x")
 
 # 在中间列显示等号，并调整位置
 mcol.markdown("<h3 style='text-align: center; margin-top: 20px;'>=</h3>", unsafe_allow_html=True)
@@ -76,7 +73,11 @@ vars_input = st.text_input("变量 (多个变量使用空格分隔, 比如 x y)"
 symbols = sp.symbols(vars_input)
 
 # 解析表达式
-equation = sp.sympify(left_expr + "-" + right_expr)
+try:
+    equation = sp.sympify(left_expr + "-" + right_expr,  evaluate=False)
+except Exception as e:
+    equation = None
+    st.error(f"无效的表达式，请检查输入的表达式是否正确, {e}")
 
 # 显示完整的方程式
 st.write("完整的方程式：")
