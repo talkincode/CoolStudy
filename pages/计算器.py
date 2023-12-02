@@ -37,40 +37,16 @@ col7, col8, col9 = st.columns(3)
 col10,col0,col12 = st.columns(3)
 
 
-if col1.button("1"):
-    update_val("1")
-    
-if col2.button("2"):
-    update_val("2")
+def create_number_button(column, number):
+    if column.button(str(number)):
+        update_val(str(number))
 
-if col3.button("3"):
-    update_val("3")
+cols = [col0,col1,col2,col3,col4,col5,col6,col7,col8,col9]
 
-if col4.button("4"):
-    update_val("4")
+ 
+for col in cols:
+    create_number_button(col, cols.index(col))
 
-if col5.button("5"):
-    update_val("5")
-
-
-if col6.button("6"):
-    update_val("6")
-
-
-if col7.button("7"):
-    update_val("7")
-
-
-if col8.button("8"):
-    update_val("8")
-
-
-if col9.button("9"):
-    update_val("9")
-
-
-if col0.button("0"):
-    update_val("0")
 
 if col10.button("加"):
    st.session_state["pos"] = "right"
