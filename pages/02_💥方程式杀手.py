@@ -4,6 +4,10 @@ import os
 import openai
 from openai import OpenAI
 
+
+# 设置侧边栏
+st.sidebar.markdown("# 💥方程式杀手")
+
 # 获取环境变量中的 OpenAI API 密钥
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
@@ -14,6 +18,7 @@ client = OpenAI()
 
 
 # 定义一个函数来发送请求到 OpenAI API
+@st.cache_data
 def get_inference(equation_str, solution_str):
     try:
         messages = [{
@@ -49,8 +54,9 @@ def get_inference(equation_str, solution_str):
 if 'chat_running' not in st.session_state:
     st.session_state['chat_running'] = False
 
+
 # 设置标题和副标题
-st.title("方程式杀手")
+st.title("💥方程式杀手")
 st.subheader("一个简单的工具，用于化简和解决方程式")
 st.markdown("---")
 
@@ -82,8 +88,7 @@ except Exception as e:
 # 显示完整的方程式
 st.write("完整的方程式：")
 st.latex(sp.latex(equation))
-
-st.markdown("---")
+st.divider()
 
 # 创建并排的按钮
 col1, col2, col3 = st.columns(3)
@@ -102,16 +107,17 @@ if col2.button("解答"):
 if col3.button("推理", disabled=st.session_state['chat_running']):
     # 创建方程式和解的字符串表示
     st.session_state['chat_running'] = True
-    solutions = sp.solve(equation, symbols)
-    equation_str = f"{left_expr} = {right_expr}"
-    solution_str = ', '.join([sp.latex(sol) for sol in solutions])
+    with st.spinner("Thinking..."):
+        solutions = sp.solve(equation, symbols)
+        equation_str = f"{left_expr} = {right_expr}"
+        solution_str = ', '.join([sp.latex(sol) for sol in solutions])
 
-    # 获取推理结果
-    result = get_inference(equation_str, solution_str)
-    st.write("推理结果:")
-    st.markdown("---")
-    st.markdown(result)
-    st.session_state['chat_running'] = False
+        # 获取推理结果
+        result = get_inference(equation_str, solution_str)
+        st.write("推理结果:")
+        st.markdown("---")
+        st.markdown(result)
+        st.session_state['chat_running'] = False
 
 
 if st.session_state['chat_running']:

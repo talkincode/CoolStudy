@@ -1,0 +1,33 @@
+version: "3"
+services:
+  coolstudy:
+    container_name: "coolstudy"
+    image: talkincode/coolstudy:latest
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+    environment:
+        - GPT_SERVICE_ADDRESS=${GPT_SERVICE_ADDRESS}
+        - GPT_SERVICE_TOKEN=${GPT_SERVICE_TOKEN}
+        - OPENAI_API_TYPE=${OPENAI_API_TYPE}
+        - OPENAI_API_KEY=${OPENAI_API_KEY}
+        - AZURE_OPENAI_API_VERSION=${AZURE_OPENAI_API_VERSION}
+        - AZURE_OPENAI_API_BASE=${AZURE_OPENAI_API_BASE}
+        - AZURE_OPENAI_API_KEY=${AZURE_OPENAI_API_KEY}
+        - MSAL_TENANTID=${MSAL_TENANTID}
+        - MSAL_APPID=${MSAL_APPID}
+        - DATA_DIR=/data
+    volumes:
+      - coolstudy-volume:/data
+    ports:
+      - "8501:8501"
+    command: ["streamlit","run", "/CoolStudy.py"]
+    networks:
+      coolstudy_network:
+
+networks:
+  coolstudy_network:
+
+volumes:
+  coolstudy-volume:
