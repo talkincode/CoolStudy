@@ -22,7 +22,7 @@ services:
       - coolstudy-volume:/data
     ports:
       - "8501:8501"
-    command: ["streamlit","run", "/CoolStudy.py"]
+    command: ["streamlit","run", "CoolStudy.py", "--server.port=8501"]
     networks:
       coolstudy_network:
 
