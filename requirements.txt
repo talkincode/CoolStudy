@@ -12,6 +12,7 @@ graphviz
 jinja2
 streamlit
 pydub
+sympy
 msal_streamlit_authentication
 opencv-python-headless
 streamlit_webrtc
