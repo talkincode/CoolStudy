@@ -8,6 +8,6 @@ sys.path.append(os.path.abspath('..'))
 load_dotenv()
 
 
-st.sidebar.markdown("# 💡Python 编程导师")
+st.markdown("## 💡Python 编程导师")
 
-get_chatbot_page("codeboy", "codeboy", is_edu=True)
+get_chatbot_page("codeboy", "codeboy", mr_ranedeer=True)

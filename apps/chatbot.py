@@ -13,8 +13,14 @@ from libs.session import PageSessionState
 sys.path.append(os.path.abspath('..'))
 load_dotenv()
 
+depth_list = ["Middle School", "Highschool", "College Prep", "Undergraduate",
+              "Graduate", "Master's", "Doctoral Candidate", "Postdoc", "Ph.D"]
 
-def get_chatbot_page(botname, knowledge_name, is_edu=False, show_libs=False):
+command_list = ["", "/plan", "/start", "/continue", "/test choice", "/test program",
+                "/result", "/help", "/config 中文"]
+
+
+def get_chatbot_page(botname, knowledge_name, mr_ranedeer=False, show_libs=False):
     page_state = PageSessionState(botname)
     # st.sidebar.markdown("# 💡Python 编程导师")
 
@@ -25,6 +31,7 @@ def get_chatbot_page(botname, knowledge_name, is_edu=False, show_libs=False):
     # 用于标记流式输出是否结束
     page_state.initn_attr("streaming_end", True)
     page_state.initn_attr("quick_command", "")
+    page_state.initn_attr("mr_ranedeer_depth", "Middle School")
 
     def end_chat_streaming():
         """当停止按钮被点击时执行，用于修改处理标志"""
@@ -49,8 +56,6 @@ def get_chatbot_page(botname, knowledge_name, is_edu=False, show_libs=False):
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-
-
     # 用户输入
     if not page_state.last_user_msg_processed:
         st.chat_input("请等待上一条消息处理完毕", disabled=True)
@@ -58,11 +63,11 @@ def get_chatbot_page(botname, knowledge_name, is_edu=False, show_libs=False):
         if prompt := st.chat_input("输入你的问题"):
             on_input_prompt(prompt)
 
-    if is_edu:
-        qprompt = st.sidebar.selectbox("快速命令列表", ["", "/plan", "/start", "/continue",
-                                                        "/test choice", "/test program", "/result",
-                                                        "/help", "/config 中文",
-                                                        ], index=0)
+    if mr_ranedeer:
+        qdepth = st.sidebar.selectbox("学习深度", depth_list, index=0)
+        if qdepth:
+            page_state.mr_ranedeer_depth = qdepth
+        qprompt = st.sidebar.selectbox("快速命令列表", command_list, index=0)
         if st.sidebar.button("发送命令"):
             on_input_prompt(qprompt)
 
@@ -80,7 +85,7 @@ def get_chatbot_page(botname, knowledge_name, is_edu=False, show_libs=False):
                 kmsg = search_knowledge(knowledge_name, page_state.chat_prompt)
                 if kmsg != "" and show_libs:
                     st.expander("📚 知识库检索结果", expanded=False).markdown(kmsg)
-                sysmsg = get_system_message(botname, kmsg)
+                sysmsg = get_system_message(botname, kmsg, depth=page_state.mr_ranedeer_depth)
                 response = openai_streaming(sysmsg, page_state.messages[-10:])
                 # 流式输出
                 placeholder = st.empty()
