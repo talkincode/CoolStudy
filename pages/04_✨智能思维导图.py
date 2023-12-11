@@ -38,7 +38,7 @@ def gen_mindmap(engine_name):
     page_state.mindmap_file = output_path
 
 
-prompt = st.text_input("输入思维导图内容提示语：", "Python 基础语法", key="ai_mindmap_prompt")
+prompt = st.text_area("输入思维导图内容提示语：", "Python 基础语法", key="ai_mindmap_prompt", height=60)
 
 if st.button("生成思维导图"):
     with st.spinner("生成中..."):
