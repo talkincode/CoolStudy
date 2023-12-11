@@ -1,9 +1,11 @@
+import json
+
 import streamlit as st
 import sys
 import os
 from dotenv import load_dotenv
 from libs.knowledge import search_knowledge
-from libs.prompts import get_codeboy_sysmsg
+from libs.prompts import get_system_message
 from libs.msal import msal_auth
 from libs.llms import openai_streaming
 from libs.session import PageSessionState
@@ -12,8 +14,8 @@ sys.path.append(os.path.abspath('..'))
 load_dotenv()
 
 
-def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func, is_edu=False, show_libs=False):
-    page_state = PageSessionState(state_prefix)
+def get_chatbot_page(botname, knowledge_name, is_edu=False, show_libs=False):
+    page_state = PageSessionState(botname)
     # st.sidebar.markdown("# 💡Python 编程导师")
 
     # 用于存储对话记录, 第一条为欢迎消息
@@ -47,10 +49,7 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func, is_edu=False, sh
         with st.chat_message(msg["role"]):
             st.write(msg["content"])
 
-    def clear_chat_history():
-        page_state.messages = []
 
-    st.sidebar.button('清除对话历史', on_click=clear_chat_history)
 
     # 用户输入
     if not page_state.last_user_msg_processed:
@@ -81,7 +80,7 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func, is_edu=False, sh
                 kmsg = search_knowledge(knowledge_name, page_state.chat_prompt)
                 if kmsg != "" and show_libs:
                     st.expander("📚 知识库检索结果", expanded=False).markdown(kmsg)
-                sysmsg = sysmsg_func(kmsg)
+                sysmsg = get_system_message(botname, kmsg)
                 response = openai_streaming(sysmsg, page_state.messages[-10:])
                 # 流式输出
                 placeholder = st.empty()
@@ -100,3 +99,10 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func, is_edu=False, sh
 
         stop_action.empty()
         end_chat_streaming()
+
+    st.sidebar.download_button('导出对话历史',
+                               data=json.dumps(page_state.messages, ensure_ascii=False),
+                               file_name="chat_history.json", mime="application/json")
+
+    if st.sidebar.button('清除对话历史'):
+        page_state.messages = []
