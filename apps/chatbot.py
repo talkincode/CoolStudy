@@ -12,7 +12,7 @@ sys.path.append(os.path.abspath('..'))
 load_dotenv()
 
 
-def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func):
+def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func, is_edu=False, show_libs=False):
     page_state = PageSessionState(state_prefix)
     # st.sidebar.markdown("# 💡Python 编程导师")
 
@@ -22,6 +22,7 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func):
     page_state.initn_attr("last_user_msg_processed", True)
     # 用于标记流式输出是否结束
     page_state.initn_attr("streaming_end", True)
+    page_state.initn_attr("quick_command", "")
 
     def end_chat_streaming():
         """当停止按钮被点击时执行，用于修改处理标志"""
@@ -32,6 +33,15 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func):
         """当开始按钮被点击时执行，用于修改处理标志"""
         page_state.streaming_end = False
         page_state.last_user_msg_processed = False
+
+    def on_input_prompt(iprompt: str):
+        if iprompt.strip() == "":
+            return
+        page_state.chat_prompt = iprompt
+        start_chat_streaming()
+        page_state.add_chat_msg("messages", {"role": "user", "content": page_state.chat_prompt})
+        with st.chat_message("user"):
+            st.write(page_state.chat_prompt)
 
     for msg in page_state.messages:
         with st.chat_message(msg["role"]):
@@ -47,11 +57,15 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func):
         st.chat_input("请等待上一条消息处理完毕", disabled=True)
     else:
         if prompt := st.chat_input("输入你的问题"):
-            page_state.chat_prompt = prompt
-            start_chat_streaming()
-            page_state.add_chat_msg("messages", {"role": "user", "content": page_state.chat_prompt})
-            with st.chat_message("user"):
-                st.write(page_state.chat_prompt)
+            on_input_prompt(prompt)
+
+    if is_edu:
+        qprompt = st.sidebar.selectbox("快速命令列表", ["", "/plan", "/start", "/continue",
+                                                        "/test choice", "/test program", "/result",
+                                                        "/help", "/config 中文",
+                                                        ], index=0)
+        if st.sidebar.button("发送命令"):
+            on_input_prompt(qprompt)
 
     stop_action = st.sidebar.empty()
     if not page_state.streaming_end:
@@ -65,7 +79,7 @@ def get_chatbot_page(state_prefix, knowledge_name, sysmsg_func):
             with st.spinner("Thinking..."):
                 # 检索知识库
                 kmsg = search_knowledge(knowledge_name, page_state.chat_prompt)
-                if kmsg != "":
+                if kmsg != "" and show_libs:
                     st.expander("📚 知识库检索结果", expanded=False).markdown(kmsg)
                 sysmsg = sysmsg_func(kmsg)
                 response = openai_streaming(sysmsg, page_state.messages[-10:])
