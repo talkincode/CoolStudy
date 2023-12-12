@@ -1,32 +1,61 @@
+import os.path
+from jinja2 import FileSystemLoader, Environment
+from jinja2 import Template
+
+_current_file_path = os.path.abspath(__file__)
+assets_path = os.path.join(os.path.dirname(_current_file_path), "assets")
+
+file_loader = FileSystemLoader(assets_path)
+env = Environment(loader=file_loader)
 
 
-def get_ta365_sysmsg(kmsg: str) -> str:
-    sysmsg = f'''
-你是一个通用型人工智能助手，可以帮助你解决各种问题。
+def get_content_from(name: str) -> str:
+    """
+    Reads the content from a Markdown file.
 
-// 指导原则
-- 你可以回答各种问题，包括生活，工作， 学习，娱乐等等
-- 总是基于事实回答问题， 不会编造不存在的事实
-- 对于不明确的问题， 会提示你提供更多的信息，引导用户
-- 避免使用复杂的语言， 保持简单， 便于理解
-- 遵守社会公德， 不会回答不当问题
-- 对于复杂的问题， 你会采取一步一步分析，逐步推理的方式回答问题
+    :param name: The name of the Markdown file.
+    :return: The content of the Markdown file as a string.
+    """
+    filepath = os.path.join(assets_path, name + ".md")
+    return open(filepath, "r", encoding="utf-8").read()
 
-'''
-    kmsgs = f"""
 
-// 知识库使用指南
+commoon_knowledge_prompt = get_content_from("knowledge_prompt")
 
-以下是从知识库检索的一些可能有关的信息， 你应该优先分析判断，和用户的输入相关度是否够高。
-如果不够高， 你可以选择不回答， 或者提示用户提供更多的信息。
-如果相关度够高， 你可以采用这些信息来辅助回答。
+mr_ranedeer = get_content_from("Mr_Ranedeer")
 
-'''
-{kmsg}
-'''
 
-"""
+def get_mr_ranedeer_message(depth: str) -> str:
+    """
+    以给定的深度呈现 Randeer 先生的信息。
+
+    :param depth: 用户学历深度级别。
+    :type depth: str
+    :return: 呈现了 Randeer 先生的信息。
+    :rtype: str
+    """
+    tpl = Template(mr_ranedeer)
+    return tpl.render({
+        "depth": depth,
+    })
+
+
+def get_system_message(name, kmsg: str, depth) -> str:
+    """
+    :param name：要渲染的模板文件的名称。
+    :param kmsg：要包含在系统消息中的知识消息。
+    :param depth：消息的深度，默认为“Middle School”。
+    :return：以字符串形式呈现的系统消息。
+    """
+    data = {"mr_ranedeer_message": get_mr_ranedeer_message(depth)}
     if kmsg not in "":
-        sysmsg += kmsgs
-
+        data["knowledge_messages"] = f"""\n{commoon_knowledge_prompt}\n'''\n{kmsg}\n'''\n"""
+    systpl = env.get_template(f"{name}.md")
+    sysmsg = systpl.render(data)
+    print(sysmsg)
     return sysmsg
+
+
+if __name__ == "__main__":
+    print(get_system_message("codeboy", "test"))
+

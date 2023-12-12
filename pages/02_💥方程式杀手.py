@@ -12,7 +12,6 @@ st.sidebar.markdown("# 💥方程式杀手")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # 设置 OpenAI API 密钥
-openai.api_key = OPENAI_API_KEY
 
 client = OpenAI()
 

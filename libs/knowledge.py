@@ -22,10 +22,11 @@ def search_knowledge(collection, query):
         "collection": collection,
         "query": query
     }
-
+    print(payload)
     response = requests.post(url, headers=headers, json=payload)
     if response.status_code != 200:
-        return f"Error searching knowledge: {response.text}"
+        print(f"Error searching knowledge: {response.text}")
+        return ""
     data = response.json()
 
     def fmt(v):

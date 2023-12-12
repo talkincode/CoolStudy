@@ -12,7 +12,6 @@ def openai_streaming(sysmsg, historys: list):
     ]
     for history in historys:
         messages.append(history)
-    print(messages)
     completion = client.chat.completions.create(
         model="gpt-4-1106-preview",
         messages=messages,
