@@ -3,7 +3,6 @@ import sys
 import os
 from dotenv import load_dotenv
 from libs.llms import openai_streaming
-from apps.chatbot import get_chatbot_page
 sys.path.append(os.path.abspath('..'))
 load_dotenv()
 
