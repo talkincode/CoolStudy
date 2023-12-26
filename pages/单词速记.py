@@ -28,7 +28,7 @@ if st.button("开始学习"):
         内容短小精悍
         单词是：{user_input}
         """
-        response = openai_streaming(msg,[])
+        response = openai_streaming(msg,[]) 
         placeholder = st.empty()
         full_response = ''
         for item in response:
@@ -49,9 +49,7 @@ key = st.sidebar.selectbox('单词列表',st.session_state.study_tate.keys())
 if st.sidebar.button("显示") and key is not None:
     infobox.markdown(st.session_state.study_tate[key])
 
-                  
-    
-
-
+if st.sidebar.button('测试'):
+    None
 
 
