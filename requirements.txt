@@ -13,6 +13,7 @@ jinja2
 streamlit
 pydub
 sympy
+redis
 msal_streamlit_authentication
 opencv-python-headless
 streamlit_webrtc
