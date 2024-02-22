@@ -89,3 +89,56 @@ The json format template:
     )
     return response.choices[0].message.content
 
+
+
+def create_timeline_data_by_openai(content):
+    """通过 OPENAI 生成history时间线数据"""
+    sysmsg = """
+You are a knowledgeable expert tasked with analyzing user input, organizing replies into a timeline structure, and replying with a properly formatted json structure with UTF-8 encoded emoticons.
+The json format template:
+
+
+
+{
+    "title": {
+        "media": {
+          "url": "",
+          "caption": " <a target=\"_blank\" href=''>credits</a>",
+          "credit": ""
+        },
+        "text": {
+          "headline": "Welcome to<br>Streamlit Timeline",
+          "text": "<p>A Streamlit Timeline component by integrating TimelineJS from Knightlab</p>"
+        }
+    },
+    "events": [
+      {
+        "media": {
+          "url": "https://vimeo.com/143407878",
+          "caption": "How to Use TimelineJS (<a target=\"_blank\" href='https://timeline.knightlab.com/'>credits</a>)"
+        },
+        "start_date": {
+          "year": "2016",
+          "month":"1"
+        },
+        "text": {
+          "headline": "TimelineJS<br>Easy-to-make, beautiful timelines.",
+          "text": "<p>TimelineJS is a populair tool from Knightlab. It has been used by more than 250,000 people to tell stories seen hundreds of millions of times, and is available in more than sixty languages. </p>"
+        }
+      }
+      ......
+    ]
+}
+
+    """
+    from openai import OpenAI
+    client = OpenAI()
+    response = client.chat.completions.create(
+        model="gpt-4-1106-preview",
+        response_format={"type": "json_object"},
+        messages=[
+            {"role": "system", "content": sysmsg},
+            {"role": "user", "content": content},
+        ]
+    )
+    return response.choices[0].message.content
