@@ -48,5 +48,12 @@ key = st.sidebar.selectbox('单词列表',st.session_state.study_tate.keys())
 if st.sidebar.button("显示") and key is not None:
     infobox.markdown(st.session_state.study_tate[key])
 
-if st.sidebar.button('测试'):
-    None
+
+if st.sidebar.button('测试') and key is not None:
+    test_word = st.session_state.study_tate[key]
+    uesr_input = st.text_input('请输入单词')
+    if test_word == user_input:
+        st.sidebar.markdown("恭喜！你记住了这个单词！")
+    else:
+        st.sidebar.markdown("很遗憾，你还需要继续学习这个单词。")
+        st.sidebar.markdown("很遗憾，你还需要继续学习这个单词。")
