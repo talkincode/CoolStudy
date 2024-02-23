@@ -10,14 +10,32 @@ from libs.msal import msal_auth
 from libs.llms import openai_streaming
 from libs.session import PageSessionState
 
-sys.path.append(os.path.abspath('..'))
+sys.path.append(os.path.abspath(".."))
 load_dotenv()
 
-depth_list = ["Middle School", "Highschool", "College Prep", "Undergraduate",
-              "Graduate", "Master's", "Doctoral Candidate", "Postdoc", "Ph.D"]
+depth_list = [
+    "Middle School",
+    "Highschool",
+    "College Prep",
+    "Undergraduate",
+    "Graduate",
+    "Master's",
+    "Doctoral Candidate",
+    "Postdoc",
+    "Ph.D",
+]
 
-command_list = ["", "/plan", "/start", "/continue", "/test choice", "/test program",
-                "/result", "/help", "/config 中文"]
+command_list = [
+    "",
+    "/plan",
+    "/start",
+    "/continue",
+    "/test choice",
+    "/test program",
+    "/result",
+    "/help",
+    "/config 中文",
+]
 
 
 def get_chatbot_page(botname, knowledge_name, mr_ranedeer=False, show_libs=False):
@@ -48,7 +66,9 @@ def get_chatbot_page(botname, knowledge_name, mr_ranedeer=False, show_libs=False
             return
         page_state.chat_prompt = iprompt
         start_chat_streaming()
-        page_state.add_chat_msg("messages", {"role": "user", "content": page_state.chat_prompt})
+        page_state.add_chat_msg(
+            "messages", {"role": "user", "content": page_state.chat_prompt}
+        )
         with st.chat_message("user"):
             st.write(page_state.chat_prompt)
 
@@ -73,24 +93,30 @@ def get_chatbot_page(botname, knowledge_name, mr_ranedeer=False, show_libs=False
 
     stop_action = st.sidebar.empty()
     if not page_state.streaming_end:
-        stop_action.button('停止输出', on_click=end_chat_streaming, help="点击此按钮停止流式输出")
+        stop_action.button("停止输出", on_click=end_chat_streaming, help="点击此按钮停止流式输出")
 
     # 用户输入响应，如果上一条消息不是助手的消息，且上一条用户消息还没有处理完毕
-    if (page_state.messages
-            and page_state.messages[-1]["role"] != "assistant"
-            and not page_state.last_user_msg_processed):
+    if (
+        page_state.messages
+        and page_state.messages[-1]["role"] != "assistant"
+        and not page_state.last_user_msg_processed
+    ):
         with st.chat_message("assistant"):
             with st.spinner("Thinking..."):
                 # 检索知识库
                 kmsg = search_knowledge(knowledge_name, page_state.chat_prompt)
                 if kmsg != "" and show_libs:
                     st.expander("📚 知识库检索结果", expanded=False).markdown(kmsg)
-                sysmsg = get_system_message(botname, kmsg, depth=page_state.mr_ranedeer_depth)
+                sysmsg = get_system_message(
+                    botname, kmsg, depth=page_state.mr_ranedeer_depth
+                )
                 response = openai_streaming(sysmsg, page_state.messages[-10:])
                 # 流式输出
                 placeholder = st.empty()
-                full_response = ''
-                page_state.add_chat_msg("messages", {"role": "assistant", "content": ""})
+                full_response = ""
+                page_state.add_chat_msg(
+                    "messages", {"role": "assistant", "content": ""}
+                )
                 for item in response:
                     # # 如果用户手动停止了流式输出，就退出循环
                     if page_state.streaming_end:
@@ -99,15 +125,20 @@ def get_chatbot_page(botname, knowledge_name, mr_ranedeer=False, show_libs=False
                     if text is not None:
                         full_response += text
                         placeholder.markdown(full_response)
-                        page_state.update_last_msg("messages", {"role": "assistant", "content": full_response})
+                        page_state.update_last_msg(
+                            "messages", {"role": "assistant", "content": full_response}
+                        )
                 placeholder.markdown(full_response)
 
         stop_action.empty()
         end_chat_streaming()
 
-    st.sidebar.download_button('导出对话历史',
-                               data=json.dumps(page_state.messages, ensure_ascii=False),
-                               file_name="chat_history.json", mime="application/json")
+    st.sidebar.download_button(
+        "导出对话历史",
+        data=json.dumps(page_state.messages, ensure_ascii=False),
+        file_name="chat_history.json",
+        mime="application/json",
+    )
 
-    if st.sidebar.button('清除对话历史'):
+    if st.sidebar.button("清除对话历史"):
         page_state.messages = []
