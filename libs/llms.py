@@ -13,7 +13,7 @@ def openai_streaming(sysmsg, historys: list):
     for history in historys:
         messages.append(history)
     completion = client.chat.completions.create(
-        model="gpt-4-1106-preview",
+        model="gpt-4-turbo-preview",
         messages=messages,
         stream=True
     )
@@ -80,7 +80,7 @@ The json format template:
     from openai import OpenAI
     client = OpenAI()
     response = client.chat.completions.create(
-        model="gpt-4-1106-preview",
+        model="gpt-4-turbo-preview",
         response_format={"type": "json_object"},
         messages=[
             {"role": "system", "content": sysmsg},
@@ -95,17 +95,16 @@ def create_timeline_data_by_openai(content):
     """通过 OPENAI 生成history时间线数据"""
     sysmsg = """
 You are a knowledgeable expert tasked with analyzing user input, organizing replies into a timeline structure, and replying with a properly formatted json structure with UTF-8 encoded emoticons.
+
+- If the generated media link must be an address that starts with https and can be accessed normally
+- Recognize the input language and the language of the result is the same as the input language
+- About 200 words per event
+- Generate no less than seven timeline events
+
 The json format template:
-
-
 
 {
     "title": {
-        "media": {
-          "url": "",
-          "caption": " <a target=\"_blank\" href=''>credits</a>",
-          "credit": ""
-        },
         "text": {
           "headline": "Welcome to<br>Streamlit Timeline",
           "text": "<p>A Streamlit Timeline component by integrating TimelineJS from Knightlab</p>"
@@ -113,10 +112,6 @@ The json format template:
     },
     "events": [
       {
-        "media": {
-          "url": "https://vimeo.com/143407878",
-          "caption": "How to Use TimelineJS (<a target=\"_blank\" href='https://timeline.knightlab.com/'>credits</a>)"
-        },
         "start_date": {
           "year": "2016",
           "month":"1"
